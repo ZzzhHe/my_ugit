@@ -1,9 +1,13 @@
 """
-Add argument parser
+In charge of parsing and processing user input.
 """
 
 # https://docs.python.org/3/library/argparse.html
 import argparse
+import os 
+
+from . import data
+
 
 def main():
     # parse the args and call whatever function was selected
@@ -27,4 +31,5 @@ def parse_args():
     return parser.parse_args()
     
 def init(args):
-    print("Hello World")
+    data.init()
+    print(f'Initialized empty ugit respository in {os.getcwd()}/{data.GIT_DIR}')
