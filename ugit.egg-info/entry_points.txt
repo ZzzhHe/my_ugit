@@ -1,0 +1,3 @@
+[console_scripts]
+ugit = ugit.cli:main
+

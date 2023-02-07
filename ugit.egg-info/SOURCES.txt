@@ -1,0 +1,7 @@
+setup.py
+ugit/cli.py
+ugit.egg-info/PKG-INFO
+ugit.egg-info/SOURCES.txt
+ugit.egg-info/dependency_links.txt
+ugit.egg-info/entry_points.txt
+ugit.egg-info/top_level.txt
