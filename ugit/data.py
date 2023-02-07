@@ -33,8 +33,9 @@ def get_object(oid, expected='bolb'):
     """
     with open(f'{GIT_DIR}/objects/{oid}', 'rb') as f:
         obj = f.read()
+        
     type_, _, content = obj.partition(b'\x00')
-    type_ = type._decode()
+    type_ = type_._decode()
     
     if expected is not None:
         # verify type_ is indeed the expected type

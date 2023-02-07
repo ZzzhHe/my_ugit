@@ -77,4 +77,4 @@ def write_tree(args):
     take the current working directory 
     and store it to the object database
     """
-    base.write_tree()
+    print(base.write_tree())
