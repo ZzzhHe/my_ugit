@@ -62,4 +62,4 @@ def cat_file(args):
     args.object(): get 'object' argument from command line
     """
     sys.stdout.flush()
-    sys.stdout.buffer.write(data.get_object(args.object))
+    sys.stdout.buffer.write(data.get_object(args.object, expected=None))
