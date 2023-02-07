@@ -38,19 +38,25 @@ def parse_args():
     cat_file_parser = commands.add_parser('cat-file')
     cat_file_parser.set_defaults(func=cat_file)
     cat_file_parser.add_argument('object')
+    
+    # create parser for 'write-tree' command, and bind
+    write_tree_parser = commands.add_parser('write-tree')
+    write_tree_parser.set_defaults(func=write_tree)
 
     # Namespace(command='init') 
     # Namespace(command='hash-object', argument='file') 
     return parser.parse_args()
     
 def init(args):
-    """ init a empty ugit respository
+    """ 
+    init a empty ugit respository
     """
     data.init()
     print(f'Initialized empty ugit respository in {os.getcwd()}/{data.GIT_DIR}')
     
 def hash_object(args):
-    """ save objects to object database in ugit respository
+    """ 
+    save objects to object database in ugit respository
     with content-addressable storage, which means 
     finding a object is based on the content of the object itself
     """
@@ -58,9 +64,17 @@ def hash_object(args):
         print(data.hash_object(f.read()))
         
 def cat_file(args):
-    """ print an object by its OID
+    """ 
+    print an object by its OID
     
     args.object(): get 'object' argument from command line
     """
     sys.stdout.flush()
     sys.stdout.buffer.write(data.get_object(args.object, expected=None))
+
+def write_tree(args):
+    """
+    take the current working directory 
+    and store it to the object database
+    """
+    base.write_tree()
