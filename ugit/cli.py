@@ -5,6 +5,7 @@ In charge of parsing and processing user input.
 # https://docs.python.org/3/library/argparse.html
 import argparse
 import os 
+import sys
 
 from . import data
 
@@ -23,14 +24,19 @@ def parse_args():
     commands = parser.add_subparsers(dest="command")
     commands.required = True
     
-    # create parese for 'init' command, and bind 'init' with init()
+    # create parser for 'init' command, and bind 'init' with init()
     init_parser = commands.add_parser('init')
     init_parser.set_defaults(func=init)
     
-    # create parese for 'hash-object' command, and bind 'hash-object' with hash_object()
+    # create parser for 'hash-object' command, and bind 'hash-object' with hash_object()
     hash_object_parser = commands.add_parser('hash-object')
     hash_object_parser.set_defaults(func=hash_object)
     hash_object_parser.add_argument('file')
+    
+    # create parser for 'cat-file' command, and bind
+    cat_file_parser = commands.add_parser('cat-file')
+    cat_file_parser.set_defaults(func=cat_file)
+    cat_file_parser.add_argument('object')
 
     # Namespace(command='init') 
     # Namespace(command='hash-object', argument='file') 
@@ -43,7 +49,17 @@ def init(args):
     print(f'Initialized empty ugit respository in {os.getcwd()}/{data.GIT_DIR}')
     
 def hash_object(args):
-    """ refer to the file's object using its hash
+    """ save objects to object database in ugit respository
+    with content-addressable storage, which means 
+    finding a object is based on the content of the object itself
     """
     with open(args.file, 'rb') as f:
         print(data.hash_object(f.read()))
+        
+def cat_file(args):
+    """ print an object by its OID
+    
+    args.object(): get 'object' argument from command line
+    """
+    sys.stdout.flush()
+    sys.stdout.buffer.write(data.get_object(args.object))
