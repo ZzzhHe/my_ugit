@@ -81,12 +81,45 @@ def get_tree(oid, base_path="."):
             assert False, f'Unknow tree entry {type_}'
     return result
 
+def _empty_current_directory():
+    """
+    delete all existing stuff before reading
+    """
+    # os.walk()
+    # Generate the file names in a directory tree 
+    # by walking the tree either top-down or bottom-up. 
+    # :root: is a string, the path to the directory
+    # :dirnames:  is a list of the names of the subdirectories in dirpath 
+    #            (including symlinks to directories, and excluding '.' and '..')
+    # :filenames: is a list of the names of the non-directory files in root
+    for root, dirnames, filenames in os.walk('.', topdown=False):
+        # iterate every files
+        for filename in filenames:
+            # Return a relative filepath to path 
+            path = os.path.relpath(f'{root}/{filename}')
+            if is_ignored(path) or not os.path.isfile(path):
+                continue
+            os.remove(path)
+        # iterate every directory
+        for dirname in dirnames:
+            path = os.path.relpath(f'{root}/{dirname}')
+            if is_ignored(path):
+                continue
+            try:
+                # delete a empty directory
+                os.rmdir(path)
+            except(FileNotFoundError, OSError):
+                # Deletion might fail if the directory contains ignored files,
+                # so it's OK
+                pass
+
 def read_tree(tree_oid):
     """
     uses 'get_tree' to get the file OIDs 
     and writes them into the working directory.
     (recover the whole tree)
     """
+    _empty_current_directory()
     for path, oid in get_tree(tree_oid, base_path='./').items():
         # 'exist_ok': no error will be raised if the target directory already exists.
         os.makedirs(os.path.dirname(path), exist_ok=True)
