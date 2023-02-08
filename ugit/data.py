@@ -14,9 +14,10 @@ def init():
 def hash_object(data, type_='blob'):
     """ 
     refer to the file's object using its hash 
-    and create a new oid path in 'objects'
+    and create a new 2 byte file in 'objects' named by oid
     
-    type_: add a type tag for each object
+    :type_: add a type tag for each object
+    :return: hash id of 'type + data'
     """
     
     obj = type_.encode() + b'\x00' + data
@@ -25,19 +26,21 @@ def hash_object(data, type_='blob'):
         out.write(obj)
     return oid
 
-def get_object(oid, expected='bolb'):
+def get_object(oid, expected='blob'):
     """ 
     get object by its OID
     
-    expected: expected type
+    :expected: expected type
+    :return: object's content
     """
     with open(f'{GIT_DIR}/objects/{oid}', 'rb') as f:
         obj = f.read()
         
     type_, _, content = obj.partition(b'\x00')
-    type_ = type_._decode()
+    type_ = type_.decode()
     
     if expected is not None:
         # verify type_ is indeed the expected type
+        # https://www.w3schools.com/python/ref_keyword_assert.asp
         assert type_ == expected, f'Expected {expected}, got {type_}'
     return content

@@ -42,9 +42,17 @@ def parse_args():
     # create parser for 'write-tree' command, and bind
     write_tree_parser = commands.add_parser('write-tree')
     write_tree_parser.set_defaults(func=write_tree)
+    
+    # create parser for 'read-tree' command, and bind
+    read_tree_parser = commands.add_parser ('read-tree')
+    read_tree_parser.set_defaults (func=read_tree)
+    read_tree_parser.add_argument ('tree')
 
     # Namespace(command='init') 
     # Namespace(command='hash-object', argument='file') 
+    # Namespace(command='cat-file', argument='object') 
+    # Namespace(command='write-tree') 
+    # Namespace(command='read-tree', argument='tree') 
     return parser.parse_args()
     
 def init(args):
@@ -78,3 +86,10 @@ def write_tree(args):
     and store it to the object database
     """
     print(base.write_tree())
+
+def read_tree(args):
+    """
+    take an OID of a tree and extract it to the working directory. 
+    (the opposite of write-tree)
+    """
+    base.read_tree(args.tree)

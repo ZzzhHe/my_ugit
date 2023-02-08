@@ -47,6 +47,53 @@ def write_tree(directory='.'):
     # return the oid of the tree (the content in files in /objects show a extra tree)
     return data.hash_object(tree.encode(), 'tree')
 
+def _iter_tree_entries(oid):
+    """
+    a generator that will take an OID of a tree, 
+    tokenize it line-by-line and yield the raw string values.
+    """
+    if not oid:
+        return
+    tree = data.get_object(oid, 'tree')
+    for entry in tree.decode().splitlines():
+        type_, oid, name = entry.split(' ', 2)
+        # yield a generator
+        # https://stackoverflow.com/questions/231767/what-does-the-yield-keyword-do 
+        yield type_, oid, name
+
+def get_tree(oid, base_path="."):
+    """
+    uses '_iter_tree_entries' to recursively parse a tree into a dictionary
+    
+    :return: a dictionary {path: oid} contains every node in the tree
+    """
+    result = {}
+    for type_, oid, name in _iter_tree_entries(oid):
+        assert '/' not in name
+        assert name not in ('..', '.')
+        path = base_path + name
+        if type_ == 'blob':
+            result[path] = oid
+        elif type_ == 'tree':
+            # 'update()' inserts the specified items to the dictionary.
+            result.update(get_tree(oid, f'{path}/'))
+        else:
+            assert False, f'Unknow tree entry {type_}'
+    return result
+
+def read_tree(tree_oid):
+    """
+    uses 'get_tree' to get the file OIDs 
+    and writes them into the working directory.
+    (recover the whole tree)
+    """
+    for path, oid in get_tree(tree_oid, base_path='./').items():
+        # 'exist_ok': no error will be raised if the target directory already exists.
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, 'wb') as f:
+            # write content of object
+            f.write(data.get_object(oid))
+    
 def is_ignored(path):
     """
     ignore it the directory that isn't part of the user's files?
