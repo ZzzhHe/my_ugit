@@ -47,12 +47,18 @@ def parse_args():
     read_tree_parser = commands.add_parser ('read-tree')
     read_tree_parser.set_defaults (func=read_tree)
     read_tree_parser.add_argument ('tree')
+    
+    # create parser for 'commit' command, and bind
+    commit_parser = commands.add_parser ('commit')
+    commit_parser.set_defaults (func=commit)
+    commit_parser.add_argument ('-m', '--message', required=True)
 
     # Namespace(command='init') 
     # Namespace(command='hash-object', argument='file') 
     # Namespace(command='cat-file', argument='object') 
     # Namespace(command='write-tree') 
     # Namespace(command='read-tree', argument='tree') 
+    # Namespace(command='commit', argument='-m') 
     return parser.parse_args()
     
 def init(args):
@@ -93,3 +99,10 @@ def read_tree(args):
     (the opposite of write-tree)
     """
     base.read_tree(args.tree)
+
+def commit(args):
+    """
+    command that will accept a commit message, 
+    snapshot the current directory and save the resulting object.
+    """
+    print(base.commit(args.message))

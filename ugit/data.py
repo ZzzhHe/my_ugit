@@ -14,7 +14,7 @@ def init():
 def hash_object(data, type_='blob'):
     """ 
     refer to the file's object using its hash 
-    and create a new 2 byte file in 'objects' named by oid
+    and create a new byte file in 'objects' named by oid
     
     :type_: add a type tag for each object
     :return: hash id of 'type + data'

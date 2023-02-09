@@ -18,6 +18,8 @@ def write_tree(directory='.'):
     if the item is a file: get and save oid of this file
     if the item is a directory: use recursion to go to the deeper level, 
                                 then get the return: an oid that deeper level's tree
+    
+    :return: the oid of the tree of the directory
     """
     
     
@@ -70,6 +72,8 @@ def get_tree(oid, base_path="."):
     result = {}
     for type_, oid, name in _iter_tree_entries(oid):
         assert '/' not in name
+        # . :'the current folder'.
+        # .. :'the folder containing the current folder'.
         assert name not in ('..', '.')
         path = base_path + name
         if type_ == 'blob':
@@ -126,7 +130,20 @@ def read_tree(tree_oid):
         with open(path, 'wb') as f:
             # write content of object
             f.write(data.get_object(oid))
+
+def commit(message):
+    """
+    write the "tree" key and the commit message to the commit object
     
+    :return: a text file stored in the object database 
+            with the type of 'commit'
+    """
+    commit = f'tree {write_tree()}\n'
+    commit += '\n'
+    commit += f'{message}\n'
+    
+    return data.hash_object(commit.encode(), 'commit')
+
 def is_ignored(path):
     """
     ignore it the directory that isn't part of the user's files?
