@@ -134,15 +134,19 @@ def read_tree(tree_oid):
 def commit(message):
     """
     write the "tree" key and the commit message to the commit object
+    then write the last commit's oid to HEAD file
     
-    :return: a text file stored in the object database 
-            with the type of 'commit'
+    :return: the oid of last last commit
     """
     commit = f'tree {write_tree()}\n'
     commit += '\n'
     commit += f'{message}\n'
     
-    return data.hash_object(commit.encode(), 'commit')
+    oid = data.hash_object(commit.encode(), 'commit')
+    
+    data.set_HEAD(oid)
+    
+    return oid
 
 def is_ignored(path):
     """
