@@ -160,6 +160,19 @@ def commit(message):
     
     return oid
 
+def checkout(oid):
+    """
+    populate the working directory 
+    with the content of the commit and move HEAD to point to it
+    
+    checkout 
+        1. travel conveniently in history
+        2. allowing multiple branches of history
+    """
+    commit = get_commit(oid)
+    read_tree(commit.tree)
+    data.set_HEAD(oid)
+
 Commit = namedtuple('Commit', ['tree', 'parent', 'message'])
 
 def get_commit(oid):

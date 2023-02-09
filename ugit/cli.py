@@ -57,6 +57,10 @@ def parse_args():
     log_parser = commands.add_parser ('log')
     log_parser.set_defaults (func=log)
     commit_parser.add_argument ('oid', nargs='?')
+    
+    checkout_parser = commands.add_parser ('checkout')
+    checkout_parser.set_defaults (func=checkout)
+    checkout_parser.add_argument ('oid')
 
     # Namespace(command='init') 
     # Namespace(command='hash-object', argument='file') 
@@ -65,6 +69,8 @@ def parse_args():
     # Namespace(command='read-tree', argument='tree') 
     # Namespace(command='commit', argument='-m') 
     # Namespace(command='log', argument='oid') 
+    # Namespace(command='checkout', argument='oid') 
+    
     return parser.parse_args()
     
 def init(args):
@@ -129,3 +135,9 @@ def log(args):
         print('')
         
         oid = commit.parent
+
+def checkout(args):
+    """
+    move HEAD to point to oid
+    """
+    base.checkout(args.oid)

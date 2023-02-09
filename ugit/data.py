@@ -47,8 +47,8 @@ def get_object(oid, expected='blob'):
 
 def set_HEAD(oid):
     """
-    call the last commit the "HEAD" 
-    and just put the OID in .ugit/HEAD file
+    recode the oid in .ugit/HEAD file
+    make HEAD point to this oid
     """
     with open(f'{GIT_DIR}/HEAD', 'w') as f:
         f.write(oid)
