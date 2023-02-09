@@ -56,6 +56,7 @@ def parse_args():
     
     log_parser = commands.add_parser ('log')
     log_parser.set_defaults (func=log)
+    commit_parser.add_argument ('oid', nargs='?')
 
     # Namespace(command='init') 
     # Namespace(command='hash-object', argument='file') 
@@ -63,7 +64,7 @@ def parse_args():
     # Namespace(command='write-tree') 
     # Namespace(command='read-tree', argument='tree') 
     # Namespace(command='commit', argument='-m') 
-    # Namespace(command='log') 
+    # Namespace(command='log', argument='oid') 
     return parser.parse_args()
     
 def init(args):
@@ -116,10 +117,10 @@ def log(args):
     """
     print entire commit history 
     
-    start from the HEAD commit and walk its parents 
-    until we reach a commit without a parent
+    start from the HEAD commit or input oid from CLI
+    and walk its parents until we reach a commit without a parent
     """
-    oid = data.get_HEAD()
+    oid = args.oid or data.get_HEAD()
     while oid:
         commit = base.get_commit(oid)
         
