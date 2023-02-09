@@ -2,7 +2,11 @@
 the basic higher-level logic of ugit
 to implement higher-level structures for storing directories
 """
+import itertools
+import operator
 import os
+
+from collections import namedtuple
 
 from . import data
 
@@ -155,6 +159,32 @@ def commit(message):
     data.set_HEAD(oid)
     
     return oid
+
+Commit = namedtuple('Commit', ['tree', 'parent', 'message'])
+
+def get_commit(oid):
+    """
+    parse a commit object by OID
+    
+    :return: 'Commit' tuple: tree, parent, message
+    """
+    parent = None
+    
+    commit = data.get_object(oid, 'commit').decode()
+    lines = iter(commit.splitlines())
+    # actually there are only two lines with oid: tree(current) and parent
+    for line in itertools.takewhile(operator.truth, lines):
+        key, value = line.split(' ', 1)
+        if key == 'tree': # current
+            tree = value
+        elif key == 'parent': # parent
+            parent = value
+        else:
+            assert False, f'Unknown field {key}'
+    
+    # the commit object - two / one lines oid infromation = message
+    message = '\n'.join(lines)
+    return Commit(tree=tree, parent=parent, message=message)
 
 def is_ignored(path):
     """
