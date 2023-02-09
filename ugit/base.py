@@ -133,12 +133,20 @@ def read_tree(tree_oid):
 
 def commit(message):
     """
-    write the "tree" key and the commit message to the commit object
-    then write the last commit's oid to HEAD file
+    write the current oid, parent oid and the commit message to the commit object
+    then write the cureent commit's oid to the HEAD file
     
-    :return: the oid of last last commit
+    This is basically a linked list implemented over the object database.
+    
+    :return: the oid of commit (current commit and parent commit)
     """
     commit = f'tree {write_tree()}\n'
+    
+    # get parent oid from the HEAD file
+    HEAD = data.get_HEAD()
+    if HEAD:
+        commit += f'parent {HEAD}\n'
+        
     commit += '\n'
     commit += f'{message}\n'
     
