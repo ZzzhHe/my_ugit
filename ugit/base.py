@@ -211,6 +211,8 @@ def get_oid(name):
     if name = type name return oid
     if name = oid return name(oid)
     """
+    # make "@" be an alias for HEAD
+    if name == '@': name = 'HEAD'
     # Name is ref(type name)
     refs_to_try = [
         # make command names shorter such as 'mytags

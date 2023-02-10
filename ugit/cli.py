@@ -59,7 +59,8 @@ def parse_args():
     
     log_parser = commands.add_parser ('log')
     log_parser.set_defaults (func=log)
-    log_parser.add_argument ('oid', type=oid, nargs='?')
+    # pass HEAD by default in argparse
+    log_parser.add_argument ('oid', default='@', type=oid, nargs='?')
     
     checkout_parser = commands.add_parser ('checkout')
     checkout_parser.set_defaults (func=checkout)
@@ -68,7 +69,8 @@ def parse_args():
     tag_parser = commands.add_parser ('tag')
     tag_parser.set_defaults (func=tag)
     tag_parser.add_argument ('name')
-    tag_parser.add_argument ('oid', type=oid, nargs='?')
+    # pass HEAD by default in argparse
+    tag_parser.add_argument ('oid', default='@', type=oid, nargs='?')
 
     # Namespace(command='init') 
     # Namespace(command='hash-object', argument='file') 
@@ -76,9 +78,9 @@ def parse_args():
     # Namespace(command='write-tree') 
     # Namespace(command='read-tree', argument='tree') 
     # Namespace(command='commit', argument='-m') 
-    # Namespace(command='log', argument='oid') 
+    # Namespace(command='log', default='@', argument='oid') 
     # Namespace(command='checkout', argument='oid') 
-    # Namespace(command='tag', argument='name','oid')
+    # Namespace(command='tag', default='@', argument='name','oid')
     return parser.parse_args()
     
 def init(args):
