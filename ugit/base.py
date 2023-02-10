@@ -173,6 +173,13 @@ def checkout(oid):
     read_tree(commit.tree)
     data.set_HEAD(oid)
 
+def create_tag(name, oid):
+    """
+    
+    """
+    # TODO Actually implement
+    pass
+
 Commit = namedtuple('Commit', ['tree', 'parent', 'message'])
 
 def get_commit(oid):

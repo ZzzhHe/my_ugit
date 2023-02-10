@@ -61,6 +61,11 @@ def parse_args():
     checkout_parser = commands.add_parser ('checkout')
     checkout_parser.set_defaults (func=checkout)
     checkout_parser.add_argument ('oid')
+    
+    tag_parser = commands.add_parser ('tag')
+    tag_parser.set_defaults (func=tag)
+    tag_parser.add_argument ('name')
+    tag_parser.add_argument ('oid', nargs='?')
 
     # Namespace(command='init') 
     # Namespace(command='hash-object', argument='file') 
@@ -70,7 +75,7 @@ def parse_args():
     # Namespace(command='commit', argument='-m') 
     # Namespace(command='log', argument='oid') 
     # Namespace(command='checkout', argument='oid') 
-    
+    # Namespace(command='tag', argument='name','oid')
     return parser.parse_args()
     
 def init(args):
@@ -141,3 +146,10 @@ def checkout(args):
     move HEAD to point to oid
     """
     base.checkout(args.oid)
+
+def tag(args):
+    """
+    create a tag for a oid to remember this oid easily
+    """
+    oid = args.oid or data.get_HEAD()
+    base.create_tag(args.names, oid)
