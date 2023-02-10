@@ -51,7 +51,9 @@ def update_ref(ref, oid):
     ref == HEAD : make HEAD point to this oid
     ref == refs/tags/ : write oid in tags files to record tags that be provided by the user
     """
-    with open(f'{GIT_DIR}/{ref}', 'w') as f:
+    ref_path = f'{GIT_DIR}/{ref}'
+    os.makedirs(os.path.dirname(ref_path), exist_ok=True)
+    with open(ref_path, 'w') as f:
         f.write(oid)
 
 def get_ref(ref):
@@ -59,6 +61,8 @@ def get_ref(ref):
     ref == HEAD: get oid from the HEAD file
     ref == refs/tags: get oid from the tag file
     """
-    if os.path.isfile(f'{GIT_DIR}/{ref}'):
-        with open(f'{GIT_DIR}/{ref}') as f:
+    ref_path = f'{GIT_DIR}/{ref}'
+    
+    if os.path.isfile(ref_path):
+        with open(ref_path) as f:
             return f.read().strip()

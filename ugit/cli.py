@@ -56,7 +56,7 @@ def parse_args():
     
     log_parser = commands.add_parser ('log')
     log_parser.set_defaults (func=log)
-    commit_parser.add_argument ('oid', nargs='?')
+    log_parser.add_argument ('oid', nargs='?')
     
     checkout_parser = commands.add_parser ('checkout')
     checkout_parser.set_defaults (func=checkout)
@@ -152,4 +152,4 @@ def tag(args):
     create a tag for a oid to remember this oid easily
     """
     oid = args.oid or data.get_ref('HEAD')
-    base.create_tag(args.names, oid)
+    base.create_tag(args.name, oid)
