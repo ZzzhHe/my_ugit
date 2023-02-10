@@ -205,6 +205,13 @@ def get_commit(oid):
     message = '\n'.join(lines)
     return Commit(tree=tree, parent=parent, message=message)
 
+def get_oid(name):
+    """
+    if name = type name return oid
+    if name = oid return name(oid)
+    """
+    return data.get_ref(name) or name
+
 def is_ignored(path):
     """
     ignore it the directory that isn't part of the user's files?

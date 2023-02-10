@@ -26,6 +26,9 @@ def parse_args():
     commands = parser.add_subparsers(dest="command")
     commands.required = True
     
+    # resolve name to oid in argparse
+    oid = base.get_oid
+    
     # create parser for 'init' command, and bind 'init' with init()
     init_parser = commands.add_parser('init')
     init_parser.set_defaults(func=init)
@@ -38,7 +41,7 @@ def parse_args():
     # create parser for 'cat-file' command, and bind
     cat_file_parser = commands.add_parser('cat-file')
     cat_file_parser.set_defaults(func=cat_file)
-    cat_file_parser.add_argument('object')
+    cat_file_parser.add_argument('object', type=oid)
     
     # create parser for 'write-tree' command, and bind
     write_tree_parser = commands.add_parser('write-tree')
@@ -47,7 +50,7 @@ def parse_args():
     # create parser for 'read-tree' command, and bind
     read_tree_parser = commands.add_parser ('read-tree')
     read_tree_parser.set_defaults (func=read_tree)
-    read_tree_parser.add_argument ('tree')
+    read_tree_parser.add_argument ('tree', type=oid)
     
     # create parser for 'commit' command, and bind
     commit_parser = commands.add_parser ('commit')
@@ -56,16 +59,16 @@ def parse_args():
     
     log_parser = commands.add_parser ('log')
     log_parser.set_defaults (func=log)
-    log_parser.add_argument ('oid', nargs='?')
+    log_parser.add_argument ('oid', type=oid, nargs='?')
     
     checkout_parser = commands.add_parser ('checkout')
     checkout_parser.set_defaults (func=checkout)
-    checkout_parser.add_argument ('oid')
+    checkout_parser.add_argument ('oid', type=oid)
     
     tag_parser = commands.add_parser ('tag')
     tag_parser.set_defaults (func=tag)
     tag_parser.add_argument ('name')
-    tag_parser.add_argument ('oid', nargs='?')
+    tag_parser.add_argument ('oid', type=oid, nargs='?')
 
     # Namespace(command='init') 
     # Namespace(command='hash-object', argument='file') 
