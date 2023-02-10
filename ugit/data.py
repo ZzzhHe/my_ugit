@@ -66,3 +66,17 @@ def get_ref(ref):
     if os.path.isfile(ref_path):
         with open(ref_path) as f:
             return f.read().strip()
+
+def iter_refs():
+    """
+    a generator which will iterate on all available refs 
+    :return: HEAD from the ugit root directory and everything under .ugit/refs
+    """
+    refs = ['HEAD']
+    for root, _, filenames in os.walk(f'{GIT_DIR}/refs/'):
+        # root = root - GIT_DIR
+        root = os.path.relpath(root, GIT_DIR)
+        refs.extend(f'{root}/{name}' for name in filenames)
+        
+    for refname in refs:
+        yield refname, get_ref(refname)

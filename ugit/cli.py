@@ -71,6 +71,10 @@ def parse_args():
     tag_parser.add_argument ('name')
     # pass HEAD by default in argparse
     tag_parser.add_argument ('oid', default='@', type=oid, nargs='?')
+    
+    # a visualization tool to see all the mess that we've created, called 'k'
+    k_parser = commands.add_parser ('k')
+    k_parser.set_defaults (func=k)
 
     # Namespace(command='init') 
     # Namespace(command='hash-object', argument='file') 
@@ -158,3 +162,10 @@ def tag(args):
     """
     oid = args.oid or data.get_ref('HEAD')
     base.create_tag(args.name, oid)
+
+def k(args):
+    """
+    a graphical visualization tool to see all the mess that we've created
+    """
+    for refname, ref in data.iter_refs():
+        print(refname, ref)
