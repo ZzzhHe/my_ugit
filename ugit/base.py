@@ -5,6 +5,7 @@ to implement higher-level structures for storing directories
 import itertools
 import operator
 import os
+import string
 
 from collections import namedtuple
 
@@ -210,7 +211,26 @@ def get_oid(name):
     if name = type name return oid
     if name = oid return name(oid)
     """
-    return data.get_ref(name) or name
+    # Name is ref(type name)
+    refs_to_try = [
+        # make command names shorter such as 'mytags
+        # rather than spell out the full name of a tag (like refs/tags/mytag)
+        f'{name}',
+        f'refs/{name}',
+        f'refs/tags/{name}'
+        f'refs/heads/{name}'
+    ]
+    for ref in refs_to_try:
+        if data.get_ref(ref):
+            return data.get_ref(ref)
+    
+    # Name is SHA1 (oid)
+    # hexdigits: "0123456789abcdefABCDEF"
+    is_hex = all(c in string.hexdigits for c in name)
+    if len(name) == 40 and is_hex:
+        return name
+    
+    assert False, f'Unknown name {name}'
 
 def is_ignored(path):
     """
