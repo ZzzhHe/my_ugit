@@ -45,18 +45,20 @@ def get_object(oid, expected='blob'):
         assert type_ == expected, f'Expected {expected}, got {type_}'
     return content
 
-def set_HEAD(oid):
+def update_ref(ref, oid):
     """
-    recode the oid in .ugit/HEAD file
-    make HEAD point to this oid
+    recode the oid in .ugit/{ref} file
+    ref == HEAD : make HEAD point to this oid
+    ref == refs/tags/ : write oid in tags files to record tags that be provided by the user
     """
-    with open(f'{GIT_DIR}/HEAD', 'w') as f:
+    with open(f'{GIT_DIR}/{ref}', 'w') as f:
         f.write(oid)
 
-def get_HEAD():
+def get_ref(ref):
     """
-    get parent's oid from the HEAD file
+    ref == HEAD: get oid from the HEAD file
+    ref == refs/tags: get oid from the tag file
     """
-    if os.path.isfile(f'{GIT_DIR}/HEAD'):
-        with open(f'{GIT_DIR}/HEAD') as f:
+    if os.path.isfile(f'{GIT_DIR}/{ref}'):
+        with open(f'{GIT_DIR}/{ref}') as f:
             return f.read().strip()

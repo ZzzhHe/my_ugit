@@ -131,7 +131,7 @@ def log(args):
     start from the HEAD commit or input oid from CLI
     and walk its parents until we reach a commit without a parent
     """
-    oid = args.oid or data.get_HEAD()
+    oid = args.oid or data.get_ref('HEAD')
     while oid:
         commit = base.get_commit(oid)
         
@@ -151,5 +151,5 @@ def tag(args):
     """
     create a tag for a oid to remember this oid easily
     """
-    oid = args.oid or data.get_HEAD()
+    oid = args.oid or data.get_ref('HEAD')
     base.create_tag(args.names, oid)
