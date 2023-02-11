@@ -62,11 +62,18 @@ def get_ref(ref):
     ref == refs/tags: get oid from the tag file
     """
     ref_path = f'{GIT_DIR}/{ref}'
-    
+    value = None
     if os.path.isfile(ref_path):
         with open(ref_path) as f:
-            return f.read().strip()
-
+            value = f.read().strip()
+    # If the file contains the content ref: <refname>, 
+    # the ref points to <refname> and
+    # then dereference it recursively.
+    if value and value.startswith('ref:'):
+        return get_ref(value.split(':', 1)[1].split())
+    
+    return value
+    
 def iter_refs():
     """
     a generator which will iterate on all available refs 
