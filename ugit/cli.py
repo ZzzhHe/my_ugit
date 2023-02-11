@@ -7,6 +7,7 @@ import argparse
 import os 
 import sys
 import textwrap
+import subprocess
 
 from . import data
 from . import base
@@ -167,13 +168,26 @@ def k(args):
     """
     a graphical visualization tool to see all the mess that we've created
     """
+    dot = 'digraph commits {\n'
+    
     oids = set()
+    # make tag name point to oid as note
     for refname, ref in data.iter_refs():
-        print(refname, ref)
+        dot += f'"{refname}" [shape=note]\n'
+        dot += f'"{refname}" -> "{ref}"\n'
         oids.add(ref)
     
+    # create a whole graph represent the history commits
     for oid in base.iter_commits_and_parents(oids):
         commit = base.get_commit(oid)
-        print(oid)
+        dot += f'"{oid}" [shape=box style=filled label="{oid[:10]}"]\n'
         if commit.parent:
-            print('Parent', commit.parent)
+            dot += f'"{oid}" -> "{commit.parent}"\n'
+    
+    dot += '}'
+    print (dot)
+    
+    with subprocess.Popen (
+            ['dot', '-Txlib', '/dev/stdin'],
+            stdin=subprocess.PIPE) as proc:
+        proc.communicate (dot.encode ())
