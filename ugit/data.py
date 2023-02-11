@@ -5,6 +5,8 @@ Here will be the code that actually touches files on disk.
 import os
 import hashlib
 
+from collections import namedtuple
+
 GIT_DIR = ".ugit"
 
 def init():
@@ -45,16 +47,21 @@ def get_object(oid, expected='blob'):
         assert type_ == expected, f'Expected {expected}, got {type_}'
     return content
 
-def update_ref(ref, oid):
+# create a RefValue container to represent the value of a ref. 
+# RefValue have a property symbolic that will say whether it's a symbolic or a direct ref.
+RefValue = namedtuple('RefValue', ['symbolic', 'value'])
+
+def update_ref(ref, value):
     """
     recode the oid in .ugit/{ref} file
     ref == HEAD : make HEAD point to this oid
     ref == refs/tags/ : write oid in tags files to record tags that be provided by the user
     """
+    assert not value.symbolic
     ref_path = f'{GIT_DIR}/{ref}'
     os.makedirs(os.path.dirname(ref_path), exist_ok=True)
     with open(ref_path, 'w') as f:
-        f.write(oid)
+        f.write(value.value)
 
 def get_ref(ref):
     """
@@ -72,7 +79,7 @@ def get_ref(ref):
     if value and value.startswith('ref:'):
         return get_ref(value.split(':', 1)[1].split())
     
-    return value
+    return RefValue(symbolic=False, value=value)
     
 def iter_refs():
     """
