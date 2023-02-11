@@ -76,6 +76,11 @@ def parse_args():
     # a visualization tool to see all the mess that we've created, called 'k'
     k_parser = commands.add_parser ('k')
     k_parser.set_defaults (func=k)
+    
+    branch_parser = commands.add_parser ('branch')
+    branch_parser.set_defaults (func=branch)
+    branch_parser.add_argument ('name')
+    branch_parser.add_argument ('start_point', default='@', type=oid, nargs='?')
 
     # Namespace(command='init') 
     # Namespace(command='hash-object', argument='file') 
@@ -83,9 +88,11 @@ def parse_args():
     # Namespace(command='write-tree') 
     # Namespace(command='read-tree', argument='tree') 
     # Namespace(command='commit', argument='-m') 
-    # Namespace(command='log', default='@', argument='oid') 
+    # Namespace(command='log', argument='oid' (default='@')) 
     # Namespace(command='checkout', argument='oid') 
-    # Namespace(command='tag', default='@', argument='name','oid')
+    # Namespace(command='tag', argument='name'; 'oid'(default='@'))
+    # Namespace(command='branch', argument='name'; 'start_point'( default='@'))
+    
     return parser.parse_args()
     
 def init(args):
@@ -188,3 +195,10 @@ def k(args):
             ['dot', '-Txlib', '/dev/stdin'],
             stdin=subprocess.PIPE) as proc:
         proc.communicate (dot.encode ())
+    
+def branch(args):
+    """
+    point a branch to a specific OID
+    """
+    base.create_branch(args.name, args.start_point)
+    print(f'Branch {args.name} created at {args.start_point[:10]}')
