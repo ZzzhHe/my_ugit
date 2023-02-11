@@ -167,5 +167,13 @@ def k(args):
     """
     a graphical visualization tool to see all the mess that we've created
     """
+    oids = set()
     for refname, ref in data.iter_refs():
         print(refname, ref)
+        oids.add(ref)
+    
+    for oid in base.iter_commits_and_parents(oids):
+        commit = base.get_commit(oid)
+        print(oid)
+        if commit.parent:
+            print('Parent', commit.parent)

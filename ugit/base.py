@@ -206,6 +206,24 @@ def get_commit(oid):
     message = '\n'.join(lines)
     return Commit(tree=tree, parent=parent, message=message)
 
+def iter_commits_and_parents(oids):
+    """
+    a generator that returns 
+    all commits that it can reach from a given set of OIDs
+    """
+    oids = set(oids)
+    visited = set()
+    
+    while oids:
+        oid = oids.pop()
+        if not oid or oid in visited:
+            continue
+        visited.add(oid)
+        yield oid
+    
+        commit = get_commit(oid)
+        oids.add(commit.parent)
+
 def get_oid(name):
     """
     if name = type name return oid
@@ -219,7 +237,7 @@ def get_oid(name):
         # rather than spell out the full name of a tag (like refs/tags/mytag)
         f'{name}',
         f'refs/{name}',
-        f'refs/tags/{name}'
+        f'refs/tags/{name}',
         f'refs/heads/{name}'
     ]
     for ref in refs_to_try:
