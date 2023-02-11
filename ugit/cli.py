@@ -141,15 +141,12 @@ def log(args):
     start from the HEAD commit or input oid from CLI
     and walk its parents until we reach a commit without a parent
     """
-    oid = args.oid or data.get_ref('HEAD')
-    while oid:
+    for oid in base.iter_commits_and_parents({args.oid}):
         commit = base.get_commit(oid)
         
         print(f'commit {oid}\n')
         print(textwrap.indent (commit.message, '    '))
         print('')
-        
-        oid = commit.parent
 
 def checkout(args):
     """
@@ -171,7 +168,7 @@ def k(args):
     dot = 'digraph commits {\n'
     
     oids = set()
-    # make tag name point to oid as note
+    # make tag name point to oid as note, including 'HEAD' tag
     for refname, ref in data.iter_refs():
         dot += f'"{refname}" [shape=note]\n'
         dot += f'"{refname}" -> "{ref}"\n'

@@ -7,7 +7,7 @@ import operator
 import os
 import string
 
-from collections import namedtuple
+from collections import deque, namedtuple
 
 from . import data
 
@@ -211,18 +211,21 @@ def iter_commits_and_parents(oids):
     a generator that returns 
     all commits that it can reach from a given set of OIDs
     """
-    oids = set(oids)
+    #  use collections.deque instead of a set 
+    # so that the order of commits is deterministic.
+    oids = deque(oids)
     visited = set()
     
     while oids:
-        oid = oids.pop()
+        oid = oids.popleft()
         if not oid or oid in visited:
             continue
         visited.add(oid)
         yield oid
     
         commit = get_commit(oid)
-        oids.add(commit.parent)
+        # Return parent next
+        oids.appendleft(commit.parent)
 
 def get_oid(name):
     """
