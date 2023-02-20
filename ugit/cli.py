@@ -99,7 +99,7 @@ def init(args):
     """ 
     init a empty ugit respository
     """
-    data.init()
+    base.init()
     print(f'Initialized empty ugit respository in {os.getcwd()}/{data.GIT_DIR}')
     
 def hash_object(args):

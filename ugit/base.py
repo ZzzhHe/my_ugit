@@ -11,6 +11,17 @@ from collections import deque, namedtuple
 
 from . import data
 
+def init():
+    """
+    make HEAD point to a ref refs/heads/master 
+    so that the repository has an initial branch, 
+    called master (meaning the main branch). 
+    The branch could have been named anything we'd like but master is the standard name
+    used for the first branch in Git.
+    """
+    data.init()
+    data.update_ref('HEAD', data.RefValue(symbolic=True, value='refs/heads/master'))
+
 def write_tree(directory='.'):
     """
     create a tree to represent the directory recursively
