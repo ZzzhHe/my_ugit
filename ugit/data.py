@@ -116,9 +116,9 @@ def _get_ref_internal(ref, deref=True):
     
     return ref, RefValue(symbolic=symbolic, value=value)
     
-def iter_refs(deref=True):
+def iter_refs(prefix='', deref=True):
     """
-    a generator which will iterate on all available refs 
+    a generator which will iterate on all available refs (with prefix) 
     :return: HEAD from the ugit root directory and everything under .ugit/refs
     """
     refs = ['HEAD']
@@ -128,6 +128,8 @@ def iter_refs(deref=True):
         refs.extend(f'{root}/{name}' for name in filenames)
         
     for refname in refs:
+        if not refname.startswith(prefix):
+            continue
         yield refname, get_ref(refname, deref=deref)
 
 def debug_get_object(path):

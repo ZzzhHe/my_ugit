@@ -79,7 +79,7 @@ def parse_args():
     
     branch_parser = commands.add_parser ('branch')
     branch_parser.set_defaults (func=branch)
-    branch_parser.add_argument ('name')
+    branch_parser.add_argument ('name', nargs='?')
     branch_parser.add_argument ('start_point', default='@', type=oid, nargs='?')
 
     status_parser = commands.add_parser('status')
@@ -203,17 +203,26 @@ def k(args):
     
 def branch(args):
     """
-    point a branch to a specific OID
+    print all branches
+    point a branch to a specific OID(args.start_point)
     """
-    base.create_branch(args.name, args.start_point)
-    print(f'Branch {args.name} created at {args.start_point[:10]}')
+    if not args.name:
+        current = base.get_branch_name()
+        for branch in base.iter_branch_names():
+            # * current branch
+            prefix = '*' if branch == current else ' '
+            print(f'{prefix} {branch}')
+        
+    else:
+        base.create_branch(args.name, args.start_point)
+        print(f'Branch {args.name} created at {args.start_point[:10]}')
     
 def status(args):
     """
     print useful information about our working directory
     """
     HEAD = base.get_oid('@') # default: HEAD
-    branch = base.get_branch()
+    branch = base.get_branch_name()
     if branch:
         print(f'On branch {branch}')
     else:
