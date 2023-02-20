@@ -82,6 +82,9 @@ def parse_args():
     branch_parser.add_argument ('name')
     branch_parser.add_argument ('start_point', default='@', type=oid, nargs='?')
 
+    status_parser = commands.add_parser('status')
+    status_parser.set_defaults(func=status)
+    
     # Namespace(command='init') 
     # Namespace(command='hash-object', argument='file') 
     # Namespace(command='cat-file', argument='object') 
@@ -92,7 +95,7 @@ def parse_args():
     # Namespace(command='checkout', argument='commit') 
     # Namespace(command='tag', argument='name'; 'oid'(default='@'))
     # Namespace(command='branch', argument='name'; 'start_point'( default='@'))
-    
+    # Namespace(command='status') 
     return parser.parse_args()
     
 def init(args):
@@ -204,3 +207,14 @@ def branch(args):
     """
     base.create_branch(args.name, args.start_point)
     print(f'Branch {args.name} created at {args.start_point[:10]}')
+    
+def status(args):
+    """
+    print useful information about our working directory
+    """
+    HEAD = base.get_oid('@') # default: HEAD
+    branch = base.get_branch()
+    if branch:
+        print(f'On branch {branch}')
+    else:
+        print(f'HEAD detached at {HEAD[:10]}')
