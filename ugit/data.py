@@ -49,6 +49,19 @@ def get_object(oid, expected='blob'):
 
 # create a RefValue container to represent the value of a ref. 
 # RefValue have a property symbolic that will say whether it's a symbolic or a direct ref.
+"""
+# https://git-scm.com/book/en/v2/Git-Internals-Git-References
+> What is ref in git?
+    A ref is an indirect way of referring to a commit. 
+    You can think of it as a user-friendly alias for a commit hash. 
+    This is Git's internal mechanism of representing branches and tags. 
+    Refs are stored as normal text files in the .git/refs directory, 
+        where .git is usually called .git.
+> What is the symbolic in ref?
+    Usually the HEAD file is a symbolic reference to the branch you’re currently on. 
+    By symbolic reference, we mean that unlike a normal reference, 
+        it contains a pointer to another reference
+"""
 RefValue = namedtuple('RefValue', ['symbolic', 'value'])
 
 def update_ref(ref, value):
@@ -58,6 +71,8 @@ def update_ref(ref, value):
     ref == refs/tags/ : write oid in tags files to record tags that be provided by the user
     """
     assert not value.symbolic
+    # to know which ref it needs to update by using _get_ref_internal
+    ref = _get_ref_internal(ref)[0]
     ref_path = f'{GIT_DIR}/{ref}'
     os.makedirs(os.path.dirname(ref_path), exist_ok=True)
     with open(ref_path, 'w') as f:
@@ -65,21 +80,30 @@ def update_ref(ref, value):
 
 def get_ref(ref):
     """
-    ref == HEAD: get oid from the HEAD file
-    ref == refs/tags: get oid from the tag file
+    return RefValue(symbolic=False, value=value)
+    """
+    return _get_ref_internal(ref)[1]
+
+def _get_ref_internal(ref):
+    """
+    return the path and the value of the last ref pointed by a symbolic ref
     """
     ref_path = f'{GIT_DIR}/{ref}'
     value = None
     if os.path.isfile(ref_path):
         with open(ref_path) as f:
             value = f.read().strip()
-    # If the file contains the content ref: <refname>, 
-    # the ref points to <refname> and
-    # then dereference it recursively.
-    if value and value.startswith('ref:'):
-        return get_ref(value.split(':', 1)[1].split())
     
-    return RefValue(symbolic=False, value=value)
+    # When given a non-symbolic ref, _get_ref_internal will return the ref name and value
+    # When given a symbolic ref, _get_ref_internal will dereference the ref recursively, 
+    #   find the name of the last non-symbolic ref (that points to an OID) and return it,
+    #   plus its value.
+    symbolic = bool(value) and value.startswith('ref:')
+    if symbolic:
+        value = value.split(':', 1)[1].strip()
+        return _get_ref_internal (value)
+
+    return ref, RefValue (symbolic=False, value=value)
     
 def iter_refs():
     """

@@ -217,7 +217,7 @@ def iter_commits_and_parents(oids):
     a generator that returns 
     all commits that it can reach from a given set of OIDs
     """
-    #  use collections.deque instead of a set 
+    # use collections.deque instead of a set 
     # so that the order of commits is deterministic.
     oids = deque(oids)
     visited = set()
