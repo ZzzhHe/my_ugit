@@ -64,7 +64,7 @@ def get_object(oid, expected='blob'):
 """
 RefValue = namedtuple('RefValue', ['symbolic', 'value'])
 
-def update_ref(ref, value):
+def update_ref(ref, value, deref=True):
     """
     recode the oid in .ugit/{ref} file
     ref == HEAD : make HEAD point to this oid
@@ -72,19 +72,19 @@ def update_ref(ref, value):
     """
     assert not value.symbolic
     # to know which ref it needs to update by using _get_ref_internal
-    ref = _get_ref_internal(ref)[0]
+    ref = _get_ref_internal(ref, deref)[0]
     ref_path = f'{GIT_DIR}/{ref}'
     os.makedirs(os.path.dirname(ref_path), exist_ok=True)
     with open(ref_path, 'w') as f:
         f.write(value.value)
 
-def get_ref(ref):
+def get_ref(ref, deref=True):
     """
-    return RefValue(symbolic=False, value=value)
+    :deref: if True, dereference all symbolic refs; if False, raw value of a ref, not dereference
     """
-    return _get_ref_internal(ref)[1]
+    return _get_ref_internal(ref, deref)[1]
 
-def _get_ref_internal(ref):
+def _get_ref_internal(ref, deref=True):
     """
     return the path and the value of the last ref pointed by a symbolic ref
     """
@@ -101,11 +101,12 @@ def _get_ref_internal(ref):
     symbolic = bool(value) and value.startswith('ref:')
     if symbolic:
         value = value.split(':', 1)[1].strip()
-        return _get_ref_internal (value)
+        if deref:
+            return _get_ref_internal (value, deref=True)
 
-    return ref, RefValue (symbolic=False, value=value)
+    return ref, RefValue (symbolic=symbolic, value=value)
     
-def iter_refs():
+def iter_refs(deref=True):
     """
     a generator which will iterate on all available refs 
     :return: HEAD from the ugit root directory and everything under .ugit/refs
@@ -117,4 +118,4 @@ def iter_refs():
         refs.extend(f'{root}/{name}' for name in filenames)
         
     for refname in refs:
-        yield refname, get_ref(refname)
+        yield refname, get_ref(refname, deref=deref)

@@ -176,10 +176,12 @@ def k(args):
     
     oids = set()
     # make tag name point to oid as note, including 'HEAD' tag
-    for refname, ref in data.iter_refs():
+    for refname, ref in data.iter_refs(deref=False):
         dot += f'"{refname}" [shape=note]\n'
         dot += f'"{refname}" -> "{ref.value}"\n'
-        oids.add(ref.value)
+        # only ono-symbolic refs can be added into the set of oids
+        if not ref.symbolic:
+            oids.add(ref.value)
     
     # create a whole graph represent the history commits
     for oid in base.iter_commits_and_parents(oids):
