@@ -151,10 +151,16 @@ def log(args):
     start from the HEAD commit or input oid from CLI
     and walk its parents until we reach a commit without a parent
     """
+    refs = {}
+    for refname, ref in data.iter_refs():
+        # 1 oid vs. more ref (may be 0)
+        refs.setdefault(ref.value, []).append(refname)
+        
     for oid in base.iter_commits_and_parents({args.oid}):
         commit = base.get_commit(oid)
         
-        print(f'commit {oid}\n')
+        refs_str = f'({", ".join(refs[oid])})' if oid in refs else ''
+        print(f'commit {oid}{refs_str}\n')
         print(textwrap.indent (commit.message, '    '))
         print('')
 
