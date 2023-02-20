@@ -20,6 +20,7 @@ def init():
     used for the first branch in Git.
     """
     data.init()
+    # HEAD is a symbolic ref that points to master
     data.update_ref('HEAD', data.RefValue(symbolic=True, value='refs/heads/master'))
 
 def write_tree(directory='.'):
@@ -202,6 +203,11 @@ def checkout(name):
     
     data.update_ref('HEAD', HEAD, deref=False)
         
+def reset(oid):
+    """
+    make HEAD's symbolic ref point to oid(old)
+    """
+    data.update_ref('HEAD', data.RefValue(symbolic=False, value=oid))
 
 def create_tag(name, oid):
     """

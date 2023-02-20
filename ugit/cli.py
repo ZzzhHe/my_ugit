@@ -85,6 +85,10 @@ def parse_args():
     status_parser = commands.add_parser('status')
     status_parser.set_defaults(func=status)
     
+    reset_parser = commands.add_parser ('reset')
+    reset_parser.set_defaults (func=reset)
+    reset_parser.add_argument ('commit', type=oid)
+    
     # Namespace(command='init') 
     # Namespace(command='hash-object', argument='file') 
     # Namespace(command='cat-file', argument='object') 
@@ -96,6 +100,7 @@ def parse_args():
     # Namespace(command='tag', argument='name'; 'oid'(default='@'))
     # Namespace(command='branch', argument='name'; 'start_point'( default='@'))
     # Namespace(command='status') 
+    # Namespace(command='reset', argument='commit(oids)') 
     return parser.parse_args()
     
 def init(args):
@@ -233,3 +238,17 @@ def status(args):
         print(f'On branch {branch}')
     else:
         print(f'HEAD detached at {HEAD[:10]}')
+
+def reset(args):
+    """
+    move HEAD to an OID of our choice,
+    which is useful to undo a commit.
+    """
+    
+    """
+    > the difference between checkout and reset?
+        checkout leaves master at the previous place. 
+        That's why we need reset, to move the actual branch and 
+        not just HEAD.
+    """
+    base.reset(args.commit)
