@@ -70,48 +70,51 @@ def update_ref(ref, value, deref=True):
     ref == HEAD : make HEAD point to this oid
     ref == refs/tags/ : write oid in tags files to record tags that be provided by the user
     """
-    # to know which ref it needs to update by using _get_ref_internal
+    # get last non-symbolic ref it needs to update by using _get_ref_internal
     ref = _get_ref_internal(ref, deref)[0]
-    
     # write a symbolic value
     assert value.value
     if value.symbolic:
         value = f'ref: {value.value}'
     else:
         value = value.value
-    
     ref_path = f'{GIT_DIR}/{ref}'
+    
     os.makedirs(os.path.dirname(ref_path), exist_ok=True)
     with open(ref_path, 'w') as f:
         f.write(value)
-
+        
 def get_ref(ref, deref=True):
     """
     :deref: if True, dereference all symbolic refs; if False, raw value of a ref, not dereference
+    
+    :return: the value of the last ref pointed by a symbolic ref
     """
     return _get_ref_internal(ref, deref)[1]
 
 def _get_ref_internal(ref, deref=True):
     """
-    return the path and the value of the last ref pointed by a symbolic ref
+    return the path and the value of the last non-symbolic ref pointed by a symbolic ref
     """
     ref_path = f'{GIT_DIR}/{ref}'
     value = None
     if os.path.isfile(ref_path):
         with open(ref_path) as f:
             value = f.read().strip()
-    
-    # When given a non-symbolic ref, _get_ref_internal will return the ref name and value
+
     # When given a symbolic ref, _get_ref_internal will dereference the ref recursively, 
     #   find the name of the last non-symbolic ref (that points to an OID) and return it,
     #   plus its value.
     symbolic = bool(value) and value.startswith('ref:')
     if symbolic:
+        # "ref: path"
+        #       value
         value = value.split(':', 1)[1].strip()
         if deref:
-            return _get_ref_internal (value, deref=True)
-
-    return ref, RefValue (symbolic=symbolic, value=value)
+            # value is the path of the symbolic ref
+            return _get_ref_internal(ref=value, deref=True)
+    
+    return ref, RefValue(symbolic=symbolic, value=value)
     
 def iter_refs(deref=True):
     """
@@ -126,3 +129,10 @@ def iter_refs(deref=True):
         
     for refname in refs:
         yield refname, get_ref(refname, deref=deref)
+
+def debug_get_object(path):
+    
+    if os.path.isfile(path):
+        with open(path) as f:
+            value = f.read()
+            return value

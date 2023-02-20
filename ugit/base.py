@@ -161,7 +161,7 @@ def commit(message):
     
     return oid
 
-def checkout(oid):
+def checkout(name):
     """
     populate the working directory 
     with the content of the commit and move HEAD to point to it
@@ -170,9 +170,27 @@ def checkout(oid):
         1. travel conveniently in history
         2. allowing multiple branches of history
     """
+    oid = get_oid(name)
     commit = get_commit(oid)
     read_tree(commit.tree)
-    data.update_ref('HEAD', data.RefValue (symbolic=False, value=oid))
+    
+    if is_branch(name):
+        """
+        HEAD = 'refs/heads/{name}', which makes HEAD point to branch
+        when commit, update the object(oid) in bramch file along the symbolic ref 
+        (in the function data._get_ref_internal(), change path 'HEAD' to the conent of HEAD file)
+        """
+        HEAD = data.RefValue(symbolic=True, value=f'refs/heads/{name}')
+    else:
+        """
+        > Be careful about 'detached HEAD'
+        commits will NOT advance the branch1, only HEAD will advance
+        cause the symbolic is False
+        """
+        HEAD = data.RefValue(symbolic=False, value=oid)
+    
+    data.update_ref('HEAD', HEAD, deref=False)
+        
 
 def create_tag(name, oid):
     """
@@ -185,6 +203,9 @@ def create_branch(name, oid):
     record branch's oid in 'refs/heads/branch_name'
     """
     data.update_ref(f'refs/heads/{name}', data.RefValue (symbolic=False, value=oid))
+
+def is_branch(branch):
+    return data.get_ref(f'refs/heads/{branch}').value is not None
 
 Commit = namedtuple('Commit', ['tree', 'parent', 'message'])
 

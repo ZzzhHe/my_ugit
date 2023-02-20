@@ -65,7 +65,7 @@ def parse_args():
     
     checkout_parser = commands.add_parser ('checkout')
     checkout_parser.set_defaults (func=checkout)
-    checkout_parser.add_argument ('oid', type=oid)
+    checkout_parser.add_argument ('commit')
     
     tag_parser = commands.add_parser ('tag')
     tag_parser.set_defaults (func=tag)
@@ -89,7 +89,7 @@ def parse_args():
     # Namespace(command='read-tree', argument='tree') 
     # Namespace(command='commit', argument='-m') 
     # Namespace(command='log', argument='oid' (default='@')) 
-    # Namespace(command='checkout', argument='oid') 
+    # Namespace(command='checkout', argument='commit') 
     # Namespace(command='tag', argument='name'; 'oid'(default='@'))
     # Namespace(command='branch', argument='name'; 'start_point'( default='@'))
     
@@ -159,7 +159,7 @@ def checkout(args):
     """
     move HEAD to point to oid
     """
-    base.checkout(args.oid)
+    base.checkout(args.commit)
 
 def tag(args):
     """
