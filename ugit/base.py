@@ -80,7 +80,7 @@ def _iter_tree_entries(oid):
         # https://stackoverflow.com/questions/231767/what-does-the-yield-keyword-do 
         yield type_, oid, name
 
-def get_tree(oid, base_path="."):
+def get_tree(oid, base_path=""):
     """
     uses '_iter_tree_entries' to recursively parse a tree into a dictionary
     
@@ -105,7 +105,8 @@ def get_tree(oid, base_path="."):
 def get_working_tree():
     """
     walk over all files in the working directory, 
-    put them in the object database and create a dict that holds all the OIDs.
+    
+    :return: a dict {file path : hash(object in the file)}
     This dictionary will represent a "tree" without actually writing a tree object.
     """
     result = {}

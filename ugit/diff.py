@@ -8,20 +8,18 @@ from . import data
 def compare_trees(*trees):
     """
     take a list of trees(*trees) 
-    :return: them grouped by filename
+    :return: trees grouped by filename
+    for example, {dog.txt:[dog_oid_1, dog_oid_2], cat.txt:[cat_oid_1, cat_oid_2]}
     """
-    # The main difference between defaultdict and dict is that 
-    # when you try to access or modify a key that’s not present in the dictionary, 
-    # a default value is automatically given to that key. 
+    # defaultdict is dict with default value 
     # default value:  a number of lists                
     #                       v 
     entries = defaultdict(lambda: [None] * len(trees))
     for i, tree in enumerate(trees):
         for path, oid in tree.items():
             entries[path][i] = oid
-    
     for path, oids in entries.items():
-        yield (path, *oids)
+        yield (path, *oids)       
     
 def diff_trees(t_from, t_to):
     """
@@ -56,3 +54,17 @@ def diff_blob(o_from, o_to, path='blob'):
             output, _ = proc.communicate()
 
         return output
+
+def iter_change_files(t_from, t_to):
+    """
+    take two trees and output all changed paths along with the change type 
+    (deleted, created, modified)
+    """
+    for path, o_from, o_to in compare_trees(t_from, t_to):
+        if o_from != o_to:
+            action = (
+                'new file' if not o_from else
+                'deleted' if not o_to else
+                'modified'
+            )
+            yield path, action

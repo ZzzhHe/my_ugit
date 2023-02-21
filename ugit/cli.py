@@ -98,21 +98,6 @@ def parse_args():
     show_parser.set_defaults(func=show)
     show_parser.add_argument('oid', default='@', type=oid, nargs='?')
     
-    # Namespace(command='init') 
-    # Namespace(command='hash-object', argument='file') 
-    # Namespace(command='cat-file', argument='object') 
-    # Namespace(command='write-tree') 
-    # Namespace(command='read-tree', argument='tree') 
-    # Namespace(command='commit', argument='-m') 
-    # Namespace(command='log', argument='oid' (default='@')) 
-    # Namespace(command='diff', argument='commit') 
-    # Namespace(command='checkout', argument='commit') 
-    # Namespace(command='tag', argument='name'; 'oid'(default='@'))
-    # Namespace(command='branch', argument='name'; 'start_point'( default='@'))
-    # Namespace(command='status') 
-    # Namespace(command='reset', argument='commit(oid)') 
-    # Namespace(command='show', argument='oid(oid)') 
-    
     return parser.parse_args()
     
 def init(args):
@@ -287,6 +272,13 @@ def status(args):
         print(f'On branch {branch}')
     else:
         print(f'HEAD detached at {HEAD[:10]}')
+        
+    print ('\nChanges to be committed:\n')
+    # comparing HEAD to the working tree (show changed files)
+    HEAD_tree = HEAD and base.get_commit(HEAD).tree
+    for path, action in diff.iter_change_files(base.get_tree(HEAD_tree), 
+                                               base.get_working_tree()):
+        print (f'{action:>12}: {path}')
 
 def reset(args):
     """
