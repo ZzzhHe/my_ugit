@@ -196,7 +196,10 @@ def show(args):
     result = diff.diff_trees(
         base.get_tree(parent_tree), 
         base.get_tree(commit.tree))
-    print(result)
+    # Since "diff"'s output is a byte string, 
+    # output it raw to stdout using sys.stdout.buffer.write()
+    sys.stdout.flush ()
+    sys.stdout.buffer.write (result)
 
 def checkout(args):
     """
