@@ -64,6 +64,10 @@ def parse_args():
     # pass HEAD by default in argparse
     log_parser.add_argument ('oid', default='@', type=oid, nargs='?')
     
+    diff_parser = commands.add_parser ('diff')
+    diff_parser.set_defaults (func=_diff)
+    diff_parser.add_argument ('commit', default='@', type=oid, nargs='?')
+    
     checkout_parser = commands.add_parser ('checkout')
     checkout_parser.set_defaults (func=checkout)
     checkout_parser.add_argument ('commit')
@@ -101,6 +105,7 @@ def parse_args():
     # Namespace(command='read-tree', argument='tree') 
     # Namespace(command='commit', argument='-m') 
     # Namespace(command='log', argument='oid' (default='@')) 
+    # Namespace(command='diff', argument='commit') 
     # Namespace(command='checkout', argument='commit') 
     # Namespace(command='tag', argument='name'; 'oid'(default='@'))
     # Namespace(command='branch', argument='name'; 'start_point'( default='@'))
@@ -201,6 +206,18 @@ def show(args):
     sys.stdout.flush ()
     sys.stdout.buffer.write (result)
 
+def _diff(args):
+    """
+    compare the current "working tree" to a commit tree
+    (by default to HEAD, but it can be any commit we want)
+    """
+    tree = args.commit and base.get_commit(args.commit).tree
+    # compare the "working tree" with the tree of some commit. 
+    # The "working tree" is a dictionary that describes the files in the working directory.
+    result = diff.diff_trees(base.get_tree(tree), base.get_working_tree())
+    sys.stdout.flush()
+    sys.stdout.buffer.write(result)
+    
 def checkout(args):
     """
     move HEAD to point to oid
