@@ -207,6 +207,7 @@ def reset(oid):
     """
     make HEAD's symbolic ref point to oid(old)
     """
+    
     data.update_ref('HEAD', data.RefValue(symbolic=False, value=oid))
 
 def create_tag(name, oid):
