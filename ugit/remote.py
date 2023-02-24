@@ -1,15 +1,24 @@
+import os
+
 from . import data
 
+REMOTE_REFS_BASE = 'refs/heads/'
+LOCAL_REFS_BASE = 'refs/remote/'
 
-def fetch(remote_path):
+
+def fetch (remote_path):
     """
     change GIT_DIR to point to the remote repository 
-    and list all refs using our battle-tested iter_refs function
+    and save all refs locally using our battle-tested iter_refs function
     """
-    # fetch: Print remote refs
-    print('Will fetch the following refs:')
-    for refname, _ in _get_remote_refs(remote_path, 'refs/heads').items ():
-        print (f'- {refname}')
+    # Get refs from server
+    refs = _get_remote_refs(remote_path, REMOTE_REFS_BASE)
+
+    # Update local refs to match server
+    for remote_name, value in refs.items():
+        refname = os.path.relpath(remote_name, REMOTE_REFS_BASE)
+        data.update_ref (f'{LOCAL_REFS_BASE}/{refname}',
+                        data.RefValue (symbolic=False, value=value))
 
 def _get_remote_refs (remote_path, prefix=''):
     """
