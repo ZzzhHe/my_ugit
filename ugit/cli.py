@@ -16,8 +16,10 @@ from . import diff
 
 def main():
     # parse the args and call whatever function was selected
-    args = parse_args()
-    args.func(args)
+    # initialized the GIT_GIR
+    with data.change_git_dir('.'):
+        args = parse_args()
+        args.func(args)
     
 def parse_args():
     parser = argparse.ArgumentParser()
