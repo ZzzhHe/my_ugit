@@ -131,7 +131,7 @@ def iter_refs(prefix='', deref=True):
     a generator which will iterate on all available refs (with prefix) 
     :return: HEAD from the ugit root directory and everything under .ugit/refs
     """
-    refs = ['HEAD']
+    refs = ['HEAD', 'MERGE_HEAD']
     for root, _, filenames in os.walk(f'{GIT_DIR}/refs/'):
         # root = root - GIT_DIR
         root = os.path.relpath(root, GIT_DIR)
@@ -140,7 +140,9 @@ def iter_refs(prefix='', deref=True):
     for refname in refs:
         if not refname.startswith(prefix):
             continue
-        yield refname, get_ref(refname, deref=deref)
+        ref = get_ref (refname, deref=deref)
+        if ref.value:
+            yield refname, ref
 
 def debug_get_object(path):
     
