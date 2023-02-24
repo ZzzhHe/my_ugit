@@ -299,6 +299,8 @@ def get_commit(oid):
     
     :return: 'Commit' tuple: tree, parent, message
     """
+    #  merges two commits together, 
+    # therefore the commit has two parent commits.
     parents = []
     
     commit = data.get_object(oid, 'commit').decode()

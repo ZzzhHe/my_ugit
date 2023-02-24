@@ -92,9 +92,19 @@ def get_ref(ref, deref=True):
     """
     return _get_ref_internal(ref, deref)[1]
 
+def delete_ref(ref, deref=True):
+    """
+    removes an existing ref
+    """
+    ref = _get_ref_internal(ref, deref)[0]
+    os.remove(f'{GIT_DIR}/{ref}')
+
 def _get_ref_internal(ref, deref=True):
     """
+    if deref is True:
     return the path and the value of the last non-symbolic ref pointed by a symbolic ref
+    else:
+    return the path and the value of the ref(passed in as parameter)
     """
     ref_path = f'{GIT_DIR}/{ref}'
     value = None
