@@ -1,7 +1,7 @@
 import subprocess
 
 from collections import defaultdict
-from tempfile import NamedTemporaryFile as Temp
+from tempfile import NamedTemporaryFile as Temp # https://docs.python.org/3/library/tempfile.html
 
 from . import data
 
@@ -10,6 +10,7 @@ def compare_trees(*trees):
     take a list of trees(*trees) 
     :return: trees grouped by filename
     for example, {dog.txt:[dog_oid_1, dog_oid_2], cat.txt:[cat_oid_1, cat_oid_2]}
+    different oids from different commits
     """
     # defaultdict is dict with default value 
     # default value:  a number of lists                
@@ -68,3 +69,34 @@ def iter_change_files(t_from, t_to):
                 'modified'
             )
             yield path, action
+
+def merge_tree(t_HEAD, t_other):
+    """
+    gets two trees and in turn calls merge_blobs() to merge each two files in the trees, 
+    outputting one merged tree
+    """
+    tree = {}
+    for path, o_HEAD, o_other in compare_trees(t_HEAD, t_other):
+        tree[path] = merge_blobs(o_HEAD, o_other)
+    return tree
+
+def merge_blobs(o_HEAD, o_other):
+    """
+    gets two OIDs and returns their merged content
+    """
+    # create a temporary file with Temp()
+    with Temp() as f_HEAD, Temp() as f_other:
+        for oid, f in ((o_HEAD, f_HEAD), (o_other, f_other)):
+            if oid:
+                f.write(data.get_object(oid))
+                f.flush()
+        
+        # a helper function that calls the diff shell command
+        with subprocess.Popen (
+            ['diff',
+             '-DHEAD', f_HEAD.name,
+             f_other.name
+            ], stdout=subprocess.PIPE) as proc:
+            output, _ = proc.communicate ()
+        
+        return output

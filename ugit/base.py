@@ -10,6 +10,7 @@ import string
 from collections import deque, namedtuple
 
 from . import data
+from . import diff
 
 def init():
     """
@@ -165,6 +166,17 @@ def read_tree(tree_oid):
             # write content of object
             f.write(data.get_object(oid))
 
+def read_tree_merged(t_HEAD, t_other):
+    """
+    calls diff.merge_trees()
+    writes the resulting merged tree to the working directory
+    """
+    _empty_current_directory()
+    for path, blob, in diff.merge_tree(get_tree(t_HEAD), get_tree(t_other)).items():
+        os.makedirs(f'./{os.path.dirname (path)}', exist_ok=True)
+        with open(path, 'wb') as f:
+            f.write(blob)
+
 def commit(message):
     """
     write the current oid, parent oid and the commit message to the commit object
@@ -228,9 +240,18 @@ def reset(oid):
     data.update_ref('HEAD', data.RefValue(symbolic=False, value=oid))
 
 
-def merge (other):
-    # TODO merge HEAD into other
-    pass
+def merge(other):
+    """
+    takes the tree of the HEAD and the tree of the branch that we want to merge with 
+    calls base.read_tree_merged()
+    """
+    HEAD = data.get_ref('HEAD').value
+    assert HEAD
+    c_HEAD = get_commit(HEAD)
+    c_other = get_commit(other)
+    
+    read_tree_merged(c_HEAD.tree, c_other.tree)
+    print("Merged in working tree")
 
 def create_tag(name, oid):
     """
