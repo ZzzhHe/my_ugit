@@ -12,6 +12,7 @@ import subprocess
 from . import data
 from . import base
 from . import diff
+from . import remote
 
 
 def main():

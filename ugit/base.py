@@ -369,9 +369,12 @@ def get_commit(oid):
 
 def iter_commits_and_parents(oids):
     """
-    a generator that returns 
-    all commits that it can reach from a given set of OIDs
+    get a list of all commits 
+    and then recursively iterates on the trees in each commit
     """
+    # Must yield the oid before acccessing it (to allow caller to fetch it
+    # if needed)
+    
     # use collections.deque instead of a set 
     # so that the order of commits is deterministic.
     oids = deque(oids)
@@ -389,6 +392,32 @@ def iter_commits_and_parents(oids):
         oids.appendleft(commit.parent[:1])
         # Return other parent next
         oid.appendleft(commit.parents[1:])
+
+def iter_objects_in_commits (oids):
+    """
+    take a list of commit OIDs 
+    and return all objects that are reachable from these commits
+    """
+    # Must yield the oid before acccessing it 
+    # (to allow caller to fetch it if needed)
+
+    visited = set()
+    def iter_objects_in_tree(oid):
+        visited.add(oid)
+        yield oid
+        for type_, oid, _ in _iter_tree_entries(oid):
+            if oid not in visited:
+                if type_ == 'tree':
+                    yield from iter_objects_in_tree(oid)
+                else:
+                    visited.add(oid)
+                    yield oid
+
+    for oid in iter_commits_and_parents(oids):
+        yield oid
+        commit = get_commit(oid)
+        if commit.tree not in visited:
+            yield from iter_objects_in_tree(commit.tree)
 
 def get_oid(name):
     """

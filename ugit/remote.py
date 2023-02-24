@@ -1,5 +1,6 @@
 import os
 
+from . import base
 from . import data
 
 REMOTE_REFS_BASE = 'refs/heads/'
@@ -11,10 +12,14 @@ def fetch (remote_path):
     change GIT_DIR to point to the remote repository 
     and save all refs locally using our battle-tested iter_refs function
     """
-    # Get refs from server
+    # Get refs from remote
     refs = _get_remote_refs(remote_path, REMOTE_REFS_BASE)
 
-    # Update local refs to match server
+    # Fetch missing objects by iterating and fetching on demand
+    for oid in base.iter_objects_in_commits(refs.values()):
+        data.fetch_object_if_missing(oid, remote_path)
+    
+    # Update local refs to match remote
     for remote_name, value in refs.items():
         refname = os.path.relpath(remote_name, REMOTE_REFS_BASE)
         data.update_ref (f'{LOCAL_REFS_BASE}/{refname}',
