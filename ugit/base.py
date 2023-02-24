@@ -263,6 +263,20 @@ def merge(other):
     read_tree_merged(c_HEAD.tree, c_other.tree)
     print('Merged in working tree\nPlease commit')
 
+def get_merge_base (oid1, oid2):
+    """
+    find the common parent of oid1 and oid2
+    :return: oid of the common parent
+    """
+    # save all parents of the first commit to a set
+    parents1 = set (iter_commits_and_parents ({oid1}))
+
+    # iterate over the parents of the second commit in ancestry order until it reaches a parent 
+    # that is a parent of the first commit
+    for oid in iter_commits_and_parents ({oid2}):
+        if oid in parents1:
+            return oid
+
 def create_tag(name, oid):
     """
     create refs/tags/{name} ref to point to the desired OID
