@@ -276,7 +276,13 @@ def status(args):
         print(f'On branch {branch}')
     else:
         print(f'HEAD detached at {HEAD[:10]}')
-        
+    
+    # if MERGE_HEAD exist
+    # helpfully inform the user when we're in the middle of a merge
+    MERGE_HEAD = data.get_ref ('MERGE_HEAD').value
+    if MERGE_HEAD:
+        print (f'Merging with {MERGE_HEAD[:10]}')
+
     print ('\nChanges to be committed:\n')
     # comparing HEAD to the working tree (show changed files)
     HEAD_tree = HEAD and base.get_commit(HEAD).tree

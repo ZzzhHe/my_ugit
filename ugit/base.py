@@ -192,7 +192,13 @@ def commit(message):
     HEAD = data.get_ref('HEAD').value
     if HEAD:
         commit += f'parent {HEAD}\n'
-        
+    
+    # take MERGE_HEAD into account and delete it after commit
+    MERGE_HEAD = data.get_ref('MERGE_HEAD').value
+    if MERGE_HEAD:
+        commit += f'parent {MERGE_HEAD}\n'
+        data.delete_ref('MERGE_HEAD', deref=False)
+    
     commit += '\n'
     commit += f'{message}\n'
     
@@ -249,9 +255,13 @@ def merge(other):
     assert HEAD
     c_HEAD = get_commit(HEAD)
     c_other = get_commit(other)
-    
+
+    # set MERGE_HEAD that point to the 'other commit'
+    # The presence of MERGE_HEAD helps ugit that 
+    # on the next commit is a merge commit with two parents - HEAD and MERGE_HEAD
+    data.update_ref('MERGE_HEAD', data.RefValue(symbolic=False, value=other))
     read_tree_merged(c_HEAD.tree, c_other.tree)
-    print("Merged in working tree")
+    print('Merged in working tree\nPlease commit')
 
 def create_tag(name, oid):
     """
