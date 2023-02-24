@@ -109,6 +109,10 @@ def parse_args():
     merge_base_parser.add_argument('commit1', type=oid)
     merge_base_parser.add_argument('commit2', type=oid)
     
+    fetch_parser = commands.add_parser('fetch')
+    fetch_parser.set_defaults(func=fetch)
+    fetch_parser.add_argument('remote')
+    
     return parser.parse_args()
     
 def init(args):
@@ -322,3 +326,10 @@ def merge_base (args):
     receive two commit OIDs and find their common ancestor
     """
     print(base.get_merge_base(args.commit1, args.commit2))
+
+def fetch(args):
+    """
+    download refs and associated objects from a remote repository
+    (only support remote repositories that are located on the same filesystem)
+    """
+    remote.fetch(args.remote)
