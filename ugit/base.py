@@ -166,13 +166,17 @@ def read_tree(tree_oid):
             # write content of object
             f.write(data.get_object(oid))
 
-def read_tree_merged(t_HEAD, t_other):
+def read_tree_merged(t_base, t_HEAD, t_other):
     """
     calls diff.merge_trees()
     writes the resulting merged tree to the working directory
     """
     _empty_current_directory()
-    for path, blob, in diff.merge_tree(get_tree(t_HEAD), get_tree(t_other)).items():
+    for path, blob, in diff.merge_tree(
+        get_tree(t_base),
+        get_tree(t_HEAD), 
+        get_tree(t_other)
+        ).items():
         os.makedirs(f'./{os.path.dirname (path)}', exist_ok=True)
         with open(path, 'wb') as f:
             f.write(blob)
@@ -248,11 +252,14 @@ def reset(oid):
 
 def merge(other):
     """
-    takes the tree of the HEAD and the tree of the branch that we want to merge with 
+    takes the tree of the HEAD and the tree of the branch that we want to merge with (+ common parent)
     calls base.read_tree_merged()
     """
     HEAD = data.get_ref('HEAD').value
     assert HEAD
+    # get the commen parent of Head and other
+    merge_base = get_merge_base(other, HEAD)
+    c_base = get_commit(merge_base)
     c_HEAD = get_commit(HEAD)
     c_other = get_commit(other)
 
@@ -260,7 +267,10 @@ def merge(other):
     # The presence of MERGE_HEAD helps ugit that 
     # on the next commit is a merge commit with two parents - HEAD and MERGE_HEAD
     data.update_ref('MERGE_HEAD', data.RefValue(symbolic=False, value=other))
-    read_tree_merged(c_HEAD.tree, c_other.tree)
+    """
+    three-way merge - an algorithm that merges two files using their common ancestor as a guide
+    """
+    read_tree_merged(c_base.tree, c_HEAD.tree, c_other.tree)
     print('Merged in working tree\nPlease commit')
 
 def get_merge_base (oid1, oid2):
@@ -269,11 +279,11 @@ def get_merge_base (oid1, oid2):
     :return: oid of the common parent
     """
     # save all parents of the first commit to a set
-    parents1 = set (iter_commits_and_parents ({oid1}))
+    parents1 = set(iter_commits_and_parents({oid1}))
 
     # iterate over the parents of the second commit in ancestry order until it reaches a parent 
     # that is a parent of the first commit
-    for oid in iter_commits_and_parents ({oid2}):
+    for oid in iter_commits_and_parents({oid2}):
         if oid in parents1:
             return oid
 

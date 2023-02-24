@@ -70,33 +70,36 @@ def iter_change_files(t_from, t_to):
             )
             yield path, action
 
-def merge_tree(t_HEAD, t_other):
+def merge_tree(t_base, t_HEAD, t_other):
     """
-    gets two trees and in turn calls merge_blobs() to merge each two files in the trees, 
+    gets two trees and in turn calls merge_blobs() to merge each two files (+ common parent) in the trees, 
     outputting one merged tree
     """
     tree = {}
-    for path, o_HEAD, o_other in compare_trees(t_HEAD, t_other):
-        tree[path] = merge_blobs(o_HEAD, o_other)
+    for path, o_base, o_HEAD, o_other in compare_trees(t_base, t_HEAD, t_other):
+        tree[path] = merge_blobs(o_base, o_HEAD, o_other)
     return tree
 
-def merge_blobs(o_HEAD, o_other):
+def merge_blobs(o_base, o_HEAD, o_other):
     """
-    gets two OIDs and returns their merged content
+    gets two OIDs (+ common parent) and returns their merged content
     """
-    # create a temporary file with Temp()
-    with Temp() as f_HEAD, Temp() as f_other:
-        for oid, f in ((o_HEAD, f_HEAD), (o_other, f_other)):
+    # Temp(): create a temporary file  
+    with Temp() as f_base, Temp() as f_HEAD, Temp() as f_other:
+        # write blobs to files
+        for oid, f in ((o_base, f_base), (o_HEAD, f_HEAD), (o_other, f_other)):
             if oid:
                 f.write(data.get_object(oid))
                 f.flush()
         
         # a helper function that calls the diff shell command
         with subprocess.Popen (
-            ['diff',
-             '-DHEAD', f_HEAD.name,
-             f_other.name
+            ['diff3', '-m',
+             '-L', 'HEAD', f_HEAD.name,
+             '-L', 'BASE', f_base.name,
+             '-L', 'MERGE_HEAD', f_other.name,
             ], stdout=subprocess.PIPE) as proc:
             output, _ = proc.communicate ()
+            assert proc.returncode in (0, 1)
         
         return output
