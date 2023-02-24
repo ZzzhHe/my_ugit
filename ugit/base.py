@@ -227,6 +227,11 @@ def reset(oid):
     
     data.update_ref('HEAD', data.RefValue(symbolic=False, value=oid))
 
+
+def merge (other):
+    # TODO merge HEAD into other
+    pass
+
 def create_tag(name, oid):
     """
     create refs/tags/{name} ref to point to the desired OID

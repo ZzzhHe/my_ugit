@@ -98,6 +98,10 @@ def parse_args():
     show_parser.set_defaults(func=show)
     show_parser.add_argument('oid', default='@', type=oid, nargs='?')
     
+    merge_parser = commands.add_parser('merge')
+    merge_parser.set_defaults(func=merge)
+    merge_parser.add_argument('commit', type=oid)
+    
     return parser.parse_args()
     
 def init(args):
@@ -293,3 +297,9 @@ def reset(args):
         not just HEAD.
     """
     base.reset(args.commit)
+    
+def merge(args):
+    """
+    bring the parallel branches back together
+    """
+    base.merge(args.commit)
