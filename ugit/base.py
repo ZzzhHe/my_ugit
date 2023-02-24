@@ -254,22 +254,36 @@ def merge(other):
     """
     takes the tree of the HEAD and the tree of the branch that we want to merge with (+ common parent)
     calls base.read_tree_merged()
+    (three-way merge + Fast-forward merge)
     """
+    
+    """
+    three-way merge - an algorithm that merges two files using their common ancestor as a guide
+    """
+    
     HEAD = data.get_ref('HEAD').value
     assert HEAD
     # get the commen parent of Head and other
     merge_base = get_merge_base(other, HEAD)
-    c_base = get_commit(merge_base)
-    c_HEAD = get_commit(HEAD)
     c_other = get_commit(other)
 
+    # Handle fast-forward merge
+    # If the common ancestor of HEAD and some-branch is HEAD itself it means that 
+    # in particular HEAD is an ancestor of some-branch.
+    if merge_base == HEAD:
+        read_tree(c_other.tree)
+        data.update_ref('HEAD',
+                        data.RefValue(symbolic=False, value=other))
+        print('Fast-forward merge, no need to commit')
+        return
+    
     # set MERGE_HEAD that point to the 'other commit'
     # The presence of MERGE_HEAD helps ugit that 
     # on the next commit is a merge commit with two parents - HEAD and MERGE_HEAD
     data.update_ref('MERGE_HEAD', data.RefValue(symbolic=False, value=other))
-    """
-    three-way merge - an algorithm that merges two files using their common ancestor as a guide
-    """
+
+    c_base = get_commit(merge_base)
+    c_HEAD = get_commit(HEAD)
     read_tree_merged(c_base.tree, c_HEAD.tree, c_other.tree)
     print('Merged in working tree\nPlease commit')
 
