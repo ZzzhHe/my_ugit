@@ -37,11 +37,18 @@ def push(remote_path, refname):
     push
     """
     # Get refs data from a branch_path
+    remote_refs = _get_remote_refs(remote_path) # get refs from remote repository
     local_ref = data.get_ref(refname).value
     assert local_ref
     
-    # find all commit in the branch
-    objects_to_push = base.iter_objects_in_commits({local_ref})
+    # Compute which objects the server doesn't have
+    # Since the remote might have refs that point to branches that we didn't pull yet, 
+    #   filter out all refs that point to unknown OIDs
+    known_remote_refs = filter(data.object_exists, remote_refs)
+    remote_objects = set(base.iter_objects_in_commits(known_remote_refs))
+    local_objects = set(base.iter_objects_in_commits({local_ref}))
+    
+    objects_to_push = local_objects - remote_objects
     
     # Push all objects
     for oid in objects_to_push:
