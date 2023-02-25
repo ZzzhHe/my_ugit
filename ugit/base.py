@@ -164,34 +164,42 @@ def _empty_current_directory():
                 # so it's OK
                 pass
 
-def read_tree(tree_oid):
+def read_tree(tree_oid, upload_working=False):
     """
-    uses 'get_tree' to get the file OIDs 
-    and writes them into the working directory.
-    (recover the whole tree)
+    uses 'get_tree' to get {path : oid}
+    update index with 'get_tree' result
+    when checkout
     """
-    _empty_current_directory()
-    for path, oid in get_tree(tree_oid, base_path='./').items():
-        # 'exist_ok': no error will be raised if the target directory already exists.
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, 'wb') as f:
-            # write content of object
-            f.write(data.get_object(oid))
+    with data.get_index() as index:
+        index.clear()
+        index.update(get_tree(tree_oid))
 
-def read_tree_merged(t_base, t_HEAD, t_other):
+        if upload_working:
+            _checkout_index(index)
+
+def read_tree_merged(t_base, t_HEAD, t_other, update_working=False):
     """
     calls diff.merge_trees()
     writes the resulting merged tree to the working directory
     """
+    with data.get_index() as index:
+        index.clear()
+        index.update(diff.merge_trees(
+            get_tree(t_base),
+            get_tree(t_HEAD),
+            get_tree(t_other)
+        ))
+
+        if update_working:
+            _checkout_index(index)    
+
+def _checkout_index(index):
     _empty_current_directory()
-    for path, blob, in diff.merge_tree(
-        get_tree(t_base),
-        get_tree(t_HEAD), 
-        get_tree(t_other)
-        ).items():
-        os.makedirs(f'./{os.path.dirname (path)}', exist_ok=True)
+    for path, oid in index.items():
+        os.makedirs(os.path.dirname(f'./{path}'), exist_ok=True)
         with open(path, 'wb') as f:
-            f.write(blob)
+            f.write(data.get_object(oid, 'blob'))
+
 
 def commit(message):
     """
@@ -235,7 +243,7 @@ def checkout(name):
     """
     oid = get_oid(name)
     commit = get_commit(oid)
-    read_tree(commit.tree)
+    read_tree(commit.tree, update_working=True)
     
     if is_branch(name):
         """
@@ -283,7 +291,7 @@ def merge(other):
     # If the common ancestor of HEAD and some-branch is HEAD itself it means that 
     # in particular HEAD is an ancestor of some-branch.
     if merge_base == HEAD:
-        read_tree(c_other.tree)
+        read_tree(c_other.tree, update_working=True)
         data.update_ref('HEAD',
                         data.RefValue(symbolic=False, value=other))
         print('Fast-forward merge, no need to commit')
@@ -296,7 +304,7 @@ def merge(other):
 
     c_base = get_commit(merge_base)
     c_HEAD = get_commit(HEAD)
-    read_tree_merged(c_base.tree, c_HEAD.tree, c_other.tree)
+    read_tree_merged(c_base.tree, c_HEAD.tree, c_other.tree, update_working=True)
     print('Merged in working tree\nPlease commit')
 
 def get_merge_base (oid1, oid2):
