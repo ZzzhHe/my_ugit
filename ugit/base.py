@@ -24,7 +24,10 @@ def init():
     # HEAD is a symbolic ref that points to master
     data.update_ref('HEAD', data.RefValue(symbolic=True, value='refs/heads/master'))
 
-def write_tree(directory='.'):
+def write_tree():
+    """
+    scan the directory recursively, writing tree objects for each directory from index. 
+    """
     """
     create a tree to represent the directory recursively
     
@@ -39,33 +42,42 @@ def write_tree(directory='.'):
     
     :return: the oid of the tree of the directory
     """
-    
-    
-    entries = []
-    with os.scandir(directory) as it:
-        for entry in it:
-            full = f'{directory}/{entry.name}'
-            if is_ignored(full):
-                continue
+    # Index is flat list, we need it as a tree of dicts
+    index_as_tree = {}
+    with data.get_index() as index:
+        for path, oid in index.items():
+            path = path.split('/')
+            dirpath, filename = path[:-1], path[-1]
             
-            if entry.is_file(follow_symlinks=False):
-                type_ = 'blob'
-                with open(full, 'rb') as f:
-                    # get a separate OID for each file
-                    oid = data.hash_object(f.read())
-            elif entry.is_dir(follow_symlinks=False):
+            current = index_as_tree
+            # Find the dict for the directory of this file
+            for dirname in dirpath:
+                current = current.setdefault(dirname, {})
+            current[filename] = oid
+    
+    def write_tree_recursive(tree_dict):
+        """
+        work with the tree of dicts and write them to the objects store
+        """
+        entries = []
+        for name, value in tree_dict().items():
+            if type(value) is dict:
                 # get an oid of the tree that can represent the directory
                 type_ = 'tree'
-                oid = write_tree(full)
-            
-            entries.append((entry.name, oid, type_))
-    
-    # create a tree for this level of the directory
-    tree = ''.join(f'{type_} {oid} {name}\n'
-                for name, oid, type_ in sorted(entries))
+                oid = write_tree_recursive(value)
+            else:
+                type_ = 'blob'
+                oid = value
+                entries.append ((name, oid, type_))
+        
+        # create a tree for this level of the directory
+        tree = ''.join(f'{type_} {oid} {name}\n'
+                    for name, oid, type_ in sorted(entries))
 
-    # return the oid of the tree (the content in files in /objects show a extra tree)
-    return data.hash_object(tree.encode(), 'tree')
+        # return the oid of the tree (the content in files in /objects show a extra tree)
+        return data.hash_object(tree.encode(), 'tree')
+    
+    return write_tree_recursive(index_as_tree)
 
 def _iter_tree_entries(oid):
     """
