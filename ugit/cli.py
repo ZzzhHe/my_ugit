@@ -305,11 +305,17 @@ def status(args):
         print (f'Merging with {MERGE_HEAD[:10]}')
 
     print ('\nChanges to be committed:\n')
-    # comparing HEAD to the working tree (show changed files)
     HEAD_tree = HEAD and base.get_commit(HEAD).tree
-    for path, action in diff.iter_change_files(base.get_tree(HEAD_tree), 
-                                               base.get_working_tree()):
-        print (f'{action:>12}: {path}')
+    # comparing HEAD and the index tree (show changed files)
+    for path, action in diff.iter_change_files(base.get_tree(HEAD_tree),
+                                                base.get_index_tree ()):
+        print(f'{action:>12}: {path}')
+
+    print('\nChanges not staged for commit:\n')
+    # comparing the index tree and the working directory (show changed files)
+    for path, action in diff.iter_changed_files(base.get_index_tree(),
+                                                base.get_working_tree()):
+        print(f'{action:>12}: {path}')
 
 def reset(args):
     """

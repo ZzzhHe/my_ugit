@@ -193,6 +193,13 @@ def read_tree_merged(t_base, t_HEAD, t_other, update_working=False):
         if update_working:
             _checkout_index(index)    
 
+def get_index_tree():
+    """
+    return index tree
+    """
+    with data.get_index() as index:
+        return index
+
 def _checkout_index(index):
     _empty_current_directory()
     for path, oid in index.items():
