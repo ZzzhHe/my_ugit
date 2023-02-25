@@ -301,6 +301,9 @@ def get_merge_base (oid1, oid2):
         if oid in parents1:
             return oid
 
+def is_ancestor_of (commit, maybe_ancestor):
+    return maybe_ancestor in iter_commits_and_parents ({commit})
+
 def create_tag(name, oid):
     """
     create refs/tags/{name} ref to point to the desired OID
