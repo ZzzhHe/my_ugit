@@ -2,7 +2,7 @@
 
 This is a small implementation of a Git-like version control system in Python following the Nikita's tutorial -- [ugit: DIY Git in Python](https://www.leshenko.net/p/ugit/#)
 
-## What ugit can do
+## What features does ugit have
 
 + `ugit init`
 + `ugit add`
