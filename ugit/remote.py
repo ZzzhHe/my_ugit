@@ -1,3 +1,7 @@
+"""
+contain all remote synchronization code
+"""
+
 import os
 
 from . import base

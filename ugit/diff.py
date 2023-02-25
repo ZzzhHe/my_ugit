@@ -1,3 +1,6 @@
+"""
+contain the code that deals with computing differences between objects
+"""
 import subprocess
 
 from collections import defaultdict
