@@ -4,6 +4,7 @@ Here will be the code that actually touches files on disk.
 """
 import os
 import hashlib
+import json
 
 from collections import namedtuple
 from contextlib import contextmanager
@@ -29,6 +30,21 @@ def init():
     os.makedirs(GIT_DIR)
     os.makedirs(f'{GIT_DIR}/objects')
     
+@contextmanager
+def get_index():
+    """
+    read and write the index in JSON format
+    """
+    index = {}
+    if os.path.isfile(f'{GIT_DIR}/index'):
+        with open(f'{GIT_DIR}/index') as f:
+            index = json.load(f)
+
+    yield index
+
+    with open(f'{GIT_DIR}/index', 'w') as f:
+        json.dump(index, f)
+
 def hash_object(data, type_='blob'):
     """ 
     refer to the file's object using its hash 

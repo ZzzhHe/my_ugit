@@ -450,6 +450,18 @@ def get_oid(name):
     
     assert False, f'Unknown name {name}'
 
+def add(filenames):
+    """
+    return index, which is a dictionary that maps filenames to their last remembered OID
+    """
+    with data.get_index() as index:
+        for filename in filenames:
+            # Normalize path
+            filename = os.path.relpath(filename)
+            with open(filename, 'rb') as f:
+                oid = data.hash_object(f.read())
+            index[filename] = oid
+
 def is_ignored(path):
     """
     ignore it the directory that isn't part of the user's files?

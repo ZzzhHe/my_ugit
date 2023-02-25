@@ -119,6 +119,10 @@ def parse_args():
     push_parser.add_argument('remote')
     push_parser.add_argument('branch')
     
+    add_parser = commands.add_parser ('add')
+    add_parser.set_defaults (func=add)
+    add_parser.add_argument ('files', nargs='+')
+    
     return parser.parse_args()
     
 def init(args):
@@ -340,7 +344,7 @@ def fetch(args):
     """
     remote.fetch(args.remote)
 
-def push (args):
+def push(args):
     """
     uploads objects and synchronizes the local refs to the remote refs
     
@@ -348,3 +352,9 @@ def push (args):
     so that it's synchronized with your local version
     """
     remote.push(args.remote, f'refs/heads/{args.branch}')
+    
+def add(args):
+    """
+    add files that we want to commit to *index*, which can allow finer grained control over commited files
+    """
+    base.add(args.files)
